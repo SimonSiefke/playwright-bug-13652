@@ -48,11 +48,15 @@ const runScenario = async (scenario) => {
     const page = await child.firstWindow();
     await page.waitForLoadState("networkidle");
     const main = page.locator('[role="main"]');
-    await expect(main).toBeVisible();
+    await expect(main).toBeVisible({
+      timeout: 15_000,
+    });
     const notification = page
       .locator("text=All installed extensions are temporarily disabled")
       .first();
-    await expect(notification).toBeVisible();
+    await expect(notification).toBeVisible({
+      timeout: 15_000,
+    });
     await scenario.setup({ page, tmpDir });
     await scenario.run(page);
   } catch (error) {
