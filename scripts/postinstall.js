@@ -3,14 +3,37 @@ import { readFileSync } from "fs";
 import { writeFile } from "fs/promises";
 import { dirname, join } from "path";
 
+const getPlatform = () => {
+  switch (process.platform) {
+    case "win32":
+      return "windows";
+    case "linux":
+      return "linux";
+    case "darwin":
+      return "macos";
+    default:
+      throw process.platform;
+  }
+};
+
+const getPackageJsonPath = (path) => {
+  const platform = getPlatform();
+  switch (platform) {
+    case "linux":
+      return join(dirname(path), "resources", "app", "package.json");
+    case "macos":
+      return join(dirname(dirname(path)), "Resources", "app", "package.json");
+    case "windows":
+      return join(dirname(path), "resources", "app", "package.json");
+    default:
+      throw new Error(`unsupported platform "${platform}"`);
+  }
+};
+
 const main = async () => {
   const path = await downloadAndUnzipVSCode("1.66.2");
-  const packageJsonPath = join(
-    dirname(path),
-    "resources",
-    "app",
-    "package.json"
-  );
+  const packageJsonPath = getPackageJsonPath(path);
+  console.log({ packageJsonPath });
   const originalContent = readFileSync(packageJsonPath, "utf-8");
   const originalParsed = JSON.parse(originalContent);
   const newParsed = {
